@@ -27,11 +27,8 @@ class StatusAPI {
             case 'POST':
                 $this->saveStatus();
                 break;
-            case 'PUT':
-                $this->updatePeople();
-                break;
             case 'DELETE':
-                $this->deletePeople();
+                $this->deleteStatus();
                 break;
             default :
                 $this->response(405);
@@ -39,8 +36,8 @@ class StatusAPI {
         }
     }
     
-    public function response($code=200, $message="", $link="http://some.url/docs") {
-        http_response_code($code);
+    public function response($status=200, $code = "", $message = "", $link = "http://some.url/docs") {
+        http_response_code($status);
         if (!empty($message)) {
             $response = array("code" => $code, "message" => $message, "link" => $link);
             echo json_encode($response, JSON_PRETTY_PRINT);
@@ -52,6 +49,7 @@ class StatusAPI {
         $r      = filter_input(INPUT_GET, 'r');
         $q      = filter_input(INPUT_GET, 'q');
         $id     = filter_input(INPUT_GET, 'id');
+        $code   = filter_input(INPUT_GET, 'code');
         $action = filter_input(INPUT_GET, 'action');
         
         if (!$p) {
@@ -68,19 +66,30 @@ class StatusAPI {
                 if ($response) {
                     echo json_encode($response, JSON_PRETTY_PRINT);
                 } else {
-                    $this->response(404, "status messge not found");
+                    $this->response(404, 400000, "status messge not found");
                 }
             } else {                
                 if (!is_numeric($p)) {
-                    $this->response(400, "invalid number of page");
+                    $this->response(400, 400002, "invalid number of page");
                 } elseif (!is_numeric($r)) {
-                    $this->response(400, "invalid number of rows");
+                    $this->response(400, 400001, "invalid number of rows");
                 } else {
                     $response = $db->getStatus(($p - 1) * $r, $r, '%'.$q.'%');
                     echo json_encode($response, JSON_PRETTY_PRINT);
                 }
             }
-        } else {
+        } elseif ($action == 'confirmation' && $code) {
+            $db = new StatusDB();
+            $response = $db->checkCODE($code);
+            if ($response) {
+                $response = $db->delete($code);
+                if ($response) {
+                    $this->response(200);
+                }
+            } else {
+                $this->response(404, 400000, "status messge not found");
+            }
+        }  else {
             $this->response(400);
         }
     }
@@ -94,11 +103,11 @@ class StatusAPI {
             $status = new StatusDB();
             if (empty($objArr)) {
                 $this->response(201, "Nothing to add. Check json");
-            } else if (isset($obj->status)) {
+            } else if (isset($obj->status) && strlen($obj->status) <= 120) {
                 if (isset($obj->email)) {
                     $email = $this->test_input($obj->email);
                     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        $this->response(201, "missing email addres");
+                        $this->response(201, 400003, "missing email addres");
                     } else {
                         $status->insert($obj->status, $email);
                         $this->response(200, "success", "new record added");
@@ -115,36 +124,33 @@ class StatusAPI {
         }
     }
     
-    function updatePeople() {
-        if (isset($_GET['action']) && isset($_GET['id'])) {
-            if ($_GET['action']=='peoples') {
-                $obj = json_decode( file_get_contents('php://input') );
-                $objArr = (array)$obj;
-                if (empty($objArr)) {
-                    $this->response(422,"error","Nothing to add. Check json");
-                } elseif (isset($obj->name)) {
-                    $db = new PeopleDB();
-                    $db->update($_GET['id'], $obj->name);
-                    $this->response(200,"success","Record updated");                  
+    function deleteStatus() {
+        $id     = filter_input(INPUT_GET, 'id');
+        $action = filter_input(INPUT_GET, 'action');
+        if ($action && $id) {
+            if ($action == 'status') {
+                $db = new StatusDB();
+                if ($db->checkID($id)) {
+                    if($db->checkID($id, TRUE)) {
+                        $response = $db->getState($id);
+                        echo $response[0]['email'].", ".md5($response[0]['id']);
+                        $send = mail($response[0]['email'], md5($response[0]['id']), md5($response[0]['id']));
+                        if ($send) {
+                            echo json_encode($response, JSON_PRETTY_PRINT);
+                        } else {
+                            $this->response(400);
+                        }
+                    } else {
+                        $this->response(400, 400005, "annon statuses cannot be deleted");
+                    }
                 } else {
-                    $this->response(422,"error","The property is not defined");
+                    $this->response(404, 400000, "status messge not found");
                 }
-                exit;
-           }
-        }
-        $this->response(400);
-    }
-    
-    function deletePeople() {
-        if (isset($_GET['action']) && isset($_GET['id'])) {
-            if ($_GET['action']=='peoples') { 
-                $db = new PeopleDB();
-                $db->delete($_GET['id']);
-                $this->response(204);
-                exit;
+            } else {
+                $this->response(400);
             }
         }
-        $this->response(400);
+        $this->response(404);
     }
     
     function test_input($data) {

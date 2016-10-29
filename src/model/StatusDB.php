@@ -58,28 +58,33 @@ class StatusDB {
         return $r;
     }
     
-    public function delete($id=0) {
-        $stmt = $this->mysqli->prepare("DELETE FROM people WHERE id = ?");
-        $stmt->bind_param('i', $id);
+    public function delete($code='') {
+        $stmt = $this->mysqli->prepare("DELETE FROM status WHERE md5(id) = ?");
+        $stmt->bind_param('s', $code);
         $r = $stmt->execute();
         $stmt->close();
         return $r;
     }
     
-    public function update($id, $newName) {
-        if ($this->checkID($id)) {
-            $stmt = $this->mysqli->prepare("UPDATE people SET name= ? WHERE id = ?");
-            $stmt->bind_param('si', $newName, $id);
-            $r = $stmt->execute();
-            $stmt->close();
-            return $r;
+    public function checkID($id, $mail = false) {
+        $where = "";
+        if ($mail) {
+            $where = "AND email != 'annonymus'";
         }
+        $stmt = $this->mysqli->prepare("SELECT * FROM status WHERE id = ? $where");
+        $stmt->bind_param("s", $id);
+        if ($stmt->execute()) {
+            $stmt->store_result();    
+            if ($stmt->num_rows == 1) {                
+                return true;
+            }
+        }        
         return false;
     }
     
-    public function checkID($id) {
-        $stmt = $this->mysqli->prepare("SELECT * FROM status WHERE id = ?");
-        $stmt->bind_param("s", $id);
+    public function checkCODE($code) {
+        $stmt = $this->mysqli->prepare("SELECT * FROM status WHERE md5(id) = ?");
+        $stmt->bind_param("s", $code);
         if ($stmt->execute()) {
             $stmt->store_result();    
             if ($stmt->num_rows == 1) {                

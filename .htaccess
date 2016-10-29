@@ -1,3 +1,4 @@
 RewriteEngine On
 RewriteRule ^([a-zA-Z_-]*)$ index.php?action=$1 [QSA]
-RewriteRule ^([a-zA-Z_-]*)/([0-9]+) index.php?action=$1&id=$2 [L,QSA]
+RewriteRule ^([a-zA-Z_-]*)/([0-9]+) index.php?action=$1&id=$2
+RewriteRule ^([a-zA-Z_-]*)/([A-Za-z0-9]+) index.php?action=$1&code=$2
