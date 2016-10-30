@@ -11,7 +11,7 @@
  *
  * @author daniel
  */
-require_once('src/model/StatusDB.php');
+require_once __DIR__ . '/../model/StatusDB.php';
 
 class StatusAPI {
     const PAGENUMBER  = 1;
@@ -41,6 +41,7 @@ class StatusAPI {
         if (!empty($message)) {
             $response = array("code" => $code, "message" => $message, "link" => $link);
             echo json_encode($response, JSON_PRETTY_PRINT);
+            return true;
         }
     }
     
@@ -65,6 +66,7 @@ class StatusAPI {
                 $response = $db->getState($id);
                 if ($response) {
                     echo json_encode($response, JSON_PRETTY_PRINT);
+                    return true;
                 } else {
                     $this->response(404, 400000, "status messge not found");
                 }
@@ -76,6 +78,7 @@ class StatusAPI {
                 } else {
                     $response = $db->getStatus(($p - 1) * $r, $r, '%'.$q.'%');
                     echo json_encode($response, JSON_PRETTY_PRINT);
+                    return true;
                 }
             }
         } elseif ($action == 'confirmation' && $code) {
