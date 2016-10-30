@@ -33,6 +33,7 @@ Intraway
 |   |   |-- model/
 |   |   |   | -- StatusDBTest.php
 |-- index.php
+```
 
 ## Configuration
 Configuration variables at the beginning of each class. 
