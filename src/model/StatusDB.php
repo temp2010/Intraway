@@ -18,6 +18,10 @@ class StatusDB {
     const PASSWORD  = 'hamlet';
     const DATABASE  = 'status';
 
+    /**
+     * class constructor.
+     * Make the Connection
+     */
     public function __construct() {
         try {
             $this->mysqli = new mysqli(self::LOCALHOST, self::USER, self::PASSWORD, self::DATABASE);
@@ -27,6 +31,11 @@ class StatusDB {
         }
     }
     
+    /**
+     * Gets a state
+     * @param integer $id id of table status
+     * @return array state
+     */
     public function getState($id=0) {
         if ($this->checkID($id)) {
             $stmt = $this->mysqli->prepare("SELECT id, email, DATE_FORMAT(create_at, '%Y-%m-%dT%TZ') AS create_at, status FROM status WHERE id = ?");
@@ -40,6 +49,13 @@ class StatusDB {
         return false;
     }
     
+    /**
+     * Gets a states
+     * @param integer $p page
+     * @param integer $r rows
+     * @param string $q search
+     * @return array status
+     */
     public function getStatus($p, $r, $q) {        
         $stmt = $this->mysqli->prepare('SELECT * FROM status WHERE status LIKE ? LIMIT ?, ?');
         $stmt->bind_param('sii', $q, $p, $r);
@@ -50,6 +66,12 @@ class StatusDB {
         return $status;
     }
     
+    /**
+     * Insert in status
+     * @param string $status status insert
+     * @param email  $email email insert
+     * @return boolean
+     */
     public function insert($status='', $email='annonymus') {
         $stmt = $this->mysqli->prepare("INSERT INTO status(email, status) VALUES (?, ?)");
         $stmt->bind_param('ss', $email, $status);
@@ -58,6 +80,11 @@ class StatusDB {
         return $r;
     }
     
+    /**
+     * Delete status
+     * @param code  id md5
+     * @return boolean
+     */
     public function delete($code='') {
         $stmt = $this->mysqli->prepare("DELETE FROM status WHERE md5(id) = ?");
         $stmt->bind_param('s', $code);
@@ -66,6 +93,10 @@ class StatusDB {
         return $r;
     }
     
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
     public function checkID($id, $mail = false) {
         $where = "";
         if ($mail) {
@@ -82,6 +113,10 @@ class StatusDB {
         return false;
     }
     
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
     public function checkCODE($code) {
         $stmt = $this->mysqli->prepare("SELECT * FROM status WHERE md5(id) = ?");
         $stmt->bind_param("s", $code);

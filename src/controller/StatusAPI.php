@@ -17,6 +17,9 @@ class StatusAPI {
     const PAGENUMBER  = 1;
     const ROWSPERPAGE = 20;
     
+    /**
+     * Start the rest methods
+     */
     public function API() {
         header('Content-Type: application/JSON');
         $method = $_SERVER['REQUEST_METHOD'];
@@ -36,6 +39,9 @@ class StatusAPI {
         }
     }
     
+    /**
+     * the return of the response ago
+     */
     public function response($status=200, $code = "", $message = "", $link = "http://some.url/docs") {
         http_response_code($status);
         if (!empty($message)) {
@@ -45,6 +51,11 @@ class StatusAPI {
         }
     }
     
+    /**
+     * this endpoint is used to retreive status messages, it will get
+     * status messages paginated. By default, it will retrrieve 20 items, sorted
+     * by date, newers first.
+     */
     public function getStatus() {
         $p      = filter_input(INPUT_GET, 'p');
         $r      = filter_input(INPUT_GET, 'r');
@@ -97,6 +108,13 @@ class StatusAPI {
         }
     }
     
+    /**
+     * this endpoint its used to publish a new status message,
+     * the messages can be either, owned by someone, or be an annon. status messages
+     * annon statuses are send with "annonymus" as value in email.
+     * if an email address is received, an e-mail will be sent with a code to validate ownership of the message.
+     * the message will be published after a succesfull validation
+     */
     function saveStatus() {
         $action = filter_input(INPUT_GET, 'action');
         
@@ -127,6 +145,10 @@ class StatusAPI {
         }
     }
     
+    /**
+     * Deletes the status message, it will also send an email
+     * with a link que te confirm the operation
+     */
     function deleteStatus() {
         $id     = filter_input(INPUT_GET, 'id');
         $action = filter_input(INPUT_GET, 'action');
@@ -156,6 +178,10 @@ class StatusAPI {
         $this->response(404);
     }
     
+    /**
+     * Sets up the fixture, for example, opens a network connection.
+     * This method is called before a test is executed.
+     */
     function test_input($data) {
         $data = trim($data);
         $data = stripslashes($data);
