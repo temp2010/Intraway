@@ -11,8 +11,10 @@ Technical college entrance exam. API for CRUD state
 * [MySQL](https://mysql.com) version 5.7+ (Oracle)
 
 ## Installation Instructions
-1. Clone the Skeletor git repository into your project's root directory or a subdirectory
+1. Clone the git repository into your project's root directory or a subdirectory
 2. Run the SQL folder 'bd'
+3. File configure the variables in the configuration folder
+4. Enable writing rules in apache
 
 ## Directory Structure
 Intraway probe can be the entirety of your web project or live side-by-side with your CMS source directory, depending on your needs. The default directory structure is as follows:
@@ -21,9 +23,15 @@ Intraway probe can be the entirety of your web project or live side-by-side with
 Intraway
 |-- bd/
 |   |-- script.sql
+|-- config/
+|   |-- Config.php
+|-- logs/
 |-- src/
+|   |-- ado/
+|   |   | -- AdoDB.php
 |   |-- controller/
-|   |   | -- StatusAPI.php 
+|   |   | -- Logs.php
+|   |   | -- StatusAPI.php
 |   |-- model/
 |   |   | -- StatusDB.php
 |-- test/
@@ -32,6 +40,7 @@ Intraway
 |   |   |   | -- StatusAPITest.php 
 |   |   |-- model/
 |   |   |   | -- StatusDBTest.php
+|-- autoload.php
 |-- index.php
 ```
 

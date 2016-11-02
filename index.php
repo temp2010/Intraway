@@ -6,6 +6,13 @@
  * and open the template in the editor.
  */
 
-require_once "src/controller/StatusAPI.php";
-$statusAPI = new StatusAPI();
+require "autoload.php";
+
+use config\Config as config;
+use src\controller as controller;
+
+$configuration = new Config();
+$logs          = new controller\Logs();
+$statusAPI     = new controller\StatusAPI();
+
 $statusAPI->API();
